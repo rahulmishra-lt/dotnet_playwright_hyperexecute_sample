@@ -18,7 +18,7 @@ class PlaywrightTestonIPad
         Dictionary<string, object> capabilities = new Dictionary<string, object>();
         Dictionary<string, string> ltOptions = new Dictionary<string, string>();
 
-        ltOptions.Add("name", "Playwright Test");
+        ltOptions.Add("name", "Playwright Login Test on iPad");
         ltOptions.Add("build", "Playwright C-Sharp tests on Hyperexecute");
         ltOptions.Add("platform", Environment.GetEnvironmentVariable("HYPEREXECUTE_PLATFORM"));
         ltOptions.Add("user", user);
@@ -40,28 +40,34 @@ class PlaywrightTestonIPad
         var page = await context.NewPageAsync();
 
         try {
-            await page.GotoAsync("https://www.google.com/");
-            await page.FillAsync("[aria - label =\"Search\"]", "Playwright");
-            await page.Keyboard.PressAsync("Enter");
-            await page.ClickAsync("xpath =//h3[contains(text(),’Playwright: Fast and reliable end-to-end testing’)]");
-            await page.GotoAsync("https://www.bing.com");
-            await page.Locator("[aria-label='Enter your search term']").ClickAsync();
-            await page.FillAsync("[aria-label='Enter your search term']", "LambdaTest");
-            await page.Keyboard.PressAsync("Enter");
+            // Navigate to the login page
+            await page.GotoAsync("https://the-internet.herokuapp.com/login");
+            
+            // Fill in the username
+            await page.FillAsync("#username", "tomsmith");
+            
+            // Fill in the password
+            await page.FillAsync("#password", "SuperSecretPassword!");
+            
+            // Click the Login button
+            await page.ClickAsync("button[type='submit']");
+            
+            // Wait for navigation and check for success
+            await page.WaitForSelectorAsync(".flash.success");
+            
+            var successMessage = await page.Locator(".flash.success").TextContentAsync();
 
-            var title = await page.TitleAsync();
-
-          if (title.Contains("LambdaTest"))
-          {
-            // Use the following code to mark the test status.
-            await SetTestStatus("passed", "Title matched", page);
-          }
-          else {
-            await SetTestStatus("failed", "Title not matched", page);
-          }
+            if (successMessage != null && successMessage.Contains("You logged into a secure area!"))
+            {
+                // Use the following code to mark the test status.
+                await SetTestStatus("passed", "Login successful on iPad", page);
+            }
+            else {
+                await SetTestStatus("failed", "Login failed - success message not found", page);
+            }
         }
         catch (Exception err) {
-          await SetTestStatus("failed", err.Message, page);
+            await SetTestStatus("failed", err.Message, page);
         }
         await browser.CloseAsync();
     }
