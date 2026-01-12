@@ -7,7 +7,7 @@ testSuiteStep: 90
 runson: win
 
 retryOnFailure: true
-maxRetries: 5
+maxRetries: 1
 
 env:
   NUGET_PACKAGES: 'C:\nuget_global_cache'
@@ -25,7 +25,7 @@ matrix:
 
 pre:
  # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-list-package
- - npm install playwright@1.25.0 --save-exact
+ - npm install playwright@1.49.0 --save-exact
  - dotnet list PlaywrightDotnetTests.csproj package > packages.txt
  - nuget locals all -clear
  - dotnet build -c Release
@@ -36,11 +36,11 @@ cacheKey: '{{ checksum "packages.txt" }}'
 
 runtime:
   language: dotnet
-  version: "6.0.303"
+  version: "8.0"
   
 
 post:
-  - cat yaml/dotnet_playwright_hyperexecute_matrix_sample.yaml
+  - cat yaml/win/dotnet_playwright_hyperexecute_matrix_sample.yaml
 
 
 testSuites:

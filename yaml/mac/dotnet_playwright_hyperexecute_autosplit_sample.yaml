@@ -1,0 +1,47 @@
+﻿---
+version: 0.1
+globalTimeout: 90
+testSuiteTimeout: 90
+testSuiteStep: 90
+
+runson: mac
+
+concurrency: 3
+
+autosplit: true
+
+retryOnFailure: true
+
+maxRetries: 1
+
+env:
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 'true'
+
+pre:
+ - npm install playwright@1.49.0 --save-exact
+ - bash -c 'dotnet list PlaywrightDotnetTests.csproj package > packages.txt'
+ - dotnet nuget locals all --clear
+ - dotnet build -c Release
+
+cacheKey: '{{ checksum "packages.txt" }}'
+
+
+runtime:
+  language: dotnet
+  version: "8.0"
+
+testDiscovery:
+  type: raw
+  mode: dynamic
+  command: grep -lr 'GotoAsync' -ir --include=*.cs
+  
+
+post:
+  - cat yaml/mac/dotnet_playwright_hyperexecute_autosplit_sample.yaml
+
+
+testRunnerCommand: dotnet run $test
+
+jobLabel: [playwright-Dotnet, mac, autosplit]

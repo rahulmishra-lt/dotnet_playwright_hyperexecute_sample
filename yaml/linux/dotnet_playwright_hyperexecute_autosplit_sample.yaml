@@ -1,0 +1,41 @@
+﻿---
+version: 0.1
+globalTimeout: 90
+testSuiteTimeout: 90
+testSuiteStep: 90
+
+runson: linux
+
+concurrency: 3
+
+autosplit: true
+
+retryOnFailure: true
+
+maxRetries: 1
+
+pre:
+ - npm install playwright@1.49.0 --save-exact
+ - dotnet list PlaywrightDotnetTests.csproj package > packages.txt
+ - nuget locals all -clear
+ - dotnet build -c Release
+
+cacheKey: '{{ checksum "packages.txt" }}'
+
+runtime:
+  language: dotnet
+  version: "8.0"
+
+testDiscovery:
+  type: raw
+  mode: dynamic
+  command: grep -lr 'GotoAsync' -ir --include=*.cs
+  
+
+post:
+  - cat yaml/linux/dotnet_playwright_hyperexecute_autosplit_sample.yaml
+
+
+testRunnerCommand: dotnet run $test
+
+jobLabel: [playwright-Dotnet, linux, autosplit]
